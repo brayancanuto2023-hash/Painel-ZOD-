@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZOD IA - Painel de Controle e Gestão</title>
+  <!-- Tailwind CSS & Lucide Icons -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Chart.js para Gráficos -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              purple: '#7c3aed',
+              dark: '#0b0b0e',
+              card: '#141418',
+              border: '#27272a',
+              neon: '#22c55e'
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-brand-dark text-gray-100 font-sans min-h-screen flex flex-col">
+
+  <div class="flex h-screen overflow-hidden">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-brand-card border-r border-brand-border flex flex-col justify-between p-4 shrink-0 overflow-y-auto">
+      <div>
+        <div class="flex items-center gap-2 mb-6">
+          <div class="w-8 h-8 rounded-lg bg-brand-purple flex items-center justify-center font-bold text-white">Z</div>
+          <span class="font-bold text-lg tracking-wide">ZOD IA</span>
+        </div>
+
+        <div class="mb-6 p-3 rounded-lg bg-zinc-900 border border-brand-border">
+          <p class="text-xs text-gray-400">Boas-vindas</p>
+          <p class="text-sm font-semibold text-brand-neon">Olá, Brayan!</p>
+        </div>
+
+        <nav class="space-y-1 text-sm">
+          <button onclick="switchTab('dashboard')" id="nav-dashboard" class="w-full text-left px-3 py-2 rounded-md hover:bg-zinc-800 flex items-center gap-2 text-zinc-300">
+            <i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard
+          </button>
+          
+          <p class="text-xs font-semibold text-gray-500 mt-4 mb-2 uppercase tracking-wider">Criação & Edição</p>
+          <button onclick="switchTab('criar')" id="nav-criar" class="w-full text-left px-3 py-2 rounded-md hover:bg-zinc-800 flex items-center gap-2 text-zinc-300">
+            <i data-lucide="wand-2" class="w-4 h-4"></i> Criar projeto com IA
+          </button>
+          <button onclick="switchTab('meus-sites')" id="nav-meus-sites" class="w-full text-left px-3 py-2 rounded-md hover:bg-zinc-800 flex items-center gap-2 text-zinc-300">
+            <i data-lucide="globe" class="w-4 h-4"></i> Meus Sites / Vitrine ZOD
+          </button>
+          <button onclick="switchTab('builder')" id="nav-builder" class="w-full text-left px-3 py-2 rounded-md hover:bg-zinc-800 flex items-center gap-2 text-zinc-300">
+            <i data-lucide="hammer" class="w-4 h-4"></i> Construtor de Páginas
+          </button>
+
+          <p class="text-xs font-semibold text-gray-500 mt-4 mb-2 uppercase tracking-wider">Vendas & Radar</p>
+          <button onclick="switchTab('clientes')" id="nav-clientes" class="w-full text-left px-3 py-2 rounded-md hover:bg-zinc-800 flex items-center gap-2 text-zinc-300">
+            <i data-lucide="radar" class="w-4 h-4"></i> Radar de Clientes (IBGE)
+          </button>
+
+          <p class="text-xs font-semibold text-gray-500 mt-4 mb-2 uppercase tracking-wider">Gestão & Finanças</p>
+          <button onclick="switchTab('financeiro')" id="nav-financeiro" class="w-full text-left px-3 py-2 rounded-md hover:bg-zinc-800 flex items-center gap-2 text-zinc-300">
+            <i data-lucide="dollar-sign" class="w-4 h-4"></i> Painel Financeiro
+          </button>
+        </nav>
+      </div>
+
+      <div class="pt-4 border-t border-brand-border text-xs text-gray-500 flex justify-between">
+        <span>Status: <span class="text-brand-neon">Online</span></span>
+        <span>v2.5 Pro</span>
+      </div>
+    </aside>
+
+    <!-- Conteúdo Principal -->
+    <main class="flex-1 overflow-y-auto p-6 bg-brand-dark" id="main-content">
+      
+      <!-- TAB 1: DASHBOARD -->
+      <section id="tab-dashboard">
+        <div class="flex justify-between items-center mb-6">
+          <h1 class="text-2xl font-bold">Visão Geral</h1>
+          <button onclick="switchTab('criar')" class="px-4 py-2 bg-brand-purple hover:bg-purple-600 rounded-lg text-sm font-semibold flex items-center gap-2">
+            <i data-lucide="plus" class="w-4 h-4"></i> Novo Site
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div class="p-4 bg-brand-card rounded-xl border border-brand-border">
+            <p class="text-xs text-gray-400">Sites Ativos</p>
+            <p class="text-2xl font-bold text-white mt-1" id="dash-sites-count">2</p>
+          </div>
+          <div class="p-4 bg-brand-card rounded-xl border border-brand-border">
+            <p class="text-xs text-gray-400">Faturamento Estimado</p>
+            <p class="text-2xl font-bold text-brand-neon mt-1">R$ 3.800,00</p>
+          </div>
+          <div class="p-4 bg-brand-card rounded-xl border border-brand-border">
+            <p class="text-xs text-gray-400">Oportunidades em Radar</p>
+            <p class="text-2xl font-bold text-white mt-1" id="dash-opps-count">5</p>
+          </div>
+          <div class="p-4 bg-brand-card rounded-xl border border-brand-border">
+            <p class="text-xs text-gray-400">Base IBGE Conectada</p>
+            <p class="text-2xl font-bold text-blue-400 mt-1">5.570 Cidades</p>
+          </div>
+        </div>
+
+        <!-- Gráfico do Dashboard -->
+        <div class="bg-brand-card p-5 rounded-xl border border-brand-border mb-6">
+          <h3 class="text-sm font-bold mb-4">Vendas & Conversões Recentes</h3>
+          <canvas id="dashChart" class="max-h-60 w-full"></canvas>
+        </div>
+      </section>
+
+      <!-- TAB 2: CRIAR COM IA -->
+      <section id="tab-criar" class="hidden">
+        <h1 class="text-2xl font-bold mb-4">Gerador de Sites com IA</h1>
+        
+        <div id="build-form" class="bg-brand-card p-6 rounded-xl border border-brand-border max-w-2xl space-y-4">
+          <div>
+            <label class="block text-sm font-medium mb-1">Nome da Empresa / Cliente</label>
+            <input id="client-name" type="text" value="Atelier do Pet" class="w-full bg-zinc-900 border border-brand-border rounded-lg p-2.5 text-sm focus:outline-none focus:border-brand-purple">
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Categoria de Negócio</label>
+            <select id="client-category" class="w-full bg-zinc-900 border border-brand-border rounded-lg p-2.5 text-sm focus:outline-none focus:border-brand-purple">
+              <option>Pet Shop / Cuidado Animal</option>
+              <option>Barbearia</option>
+              <option>Salão de Beleza</option>
+              <option>Hortifruti</option>
+              <option>Farmácia / Drogaria</option>
+            </select>
+          </div>
+          <button onclick="startGeneration()" class="w-full py-3 bg-brand-purple hover:bg-purple-600 font-semibold rounded-lg text-sm transition">Gerar Site Agora</button>
+        </div>
+
+        <div id="build-progress" class="hidden bg-brand-card p-6 rounded-xl border border-brand-border max-w-2xl mt-4">
+          <p class="font-semibold text-sm mb-2" id="status-text">Iniciando geração...</p>
+          <div class="w-full bg-zinc-800 h-3 rounded-full overflow-hidden mb-4">
+            <div id="progress-bar" class="bg-brand-purple h-full w-0 transition-all duration-300"></div>
+          </div>
+          <div id="preview-btn-container" class="hidden">
+            <button onclick="switchTab('meus-sites')" class="w-full py-2.5 bg-brand-neon text-zinc-950 font-bold rounded-lg text-sm">Acessar na Vitrine ZOD</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: MEUS SITES / VITRINE ZOD -->
+      <section id="tab-meus-sites" class="hidden">
+        <div class="flex justify-between items-center mb-6">
+          <div>
+            <h1 class="text-2xl font-bold">Vitrine ZOD & Meus Sites</h1>
+            <p class="text-xs text-gray-400">Gerencie todos os sites criados para seus clientes</p>
+          </div>
+          <button onclick="switchTab('criar')" class="px-4 py-2 bg-brand-purple hover:bg-purple-600 rounded-lg text-sm font-semibold">+ Criar Novo Site</button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="sites-grid">
+          <!-- Item gerado por JS estaticamente/dinamicamente -->
+        </div>
+      </section>
+
+      <!-- TAB 4: CONSTRUTOR DE PÁGINAS -->
+      <section id="tab-builder" class="hidden">
+        <h1 class="text-2xl font-bold mb-2">Construtor Visual de Páginas</h1>
+        <p class="text-xs text-gray-400 mb-6">Edite blocos, textos e cores do seu site ativo diretamente no painel</p>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="bg-brand-card p-4 rounded-xl border border-brand-border space-y-4">
+            <h3 class="font-semibold text-sm border-b border-brand-border pb-2">Editar Seções</h3>
+            <div>
+              <label class="block text-xs text-gray-400 mb-1">Título do Banner Principal</label>
+              <input id="builder-title-input" type="text" value="Cuidado & Amor Para Seu Pet" oninput="updateBuilderPreview()" class="w-full bg-zinc-900 border border-brand-border rounded p-2 text-xs">
+            </div>
+            <div>
+              <label class="block text-xs text-gray-400 mb-1">Texto de Descrição</label>
+              <textarea id="builder-desc-input" rows="3" oninput="updateBuilderPreview()" class="w-full bg-zinc-900 border border-brand-border rounded p-2 text-xs">Agende consultas e banhos com os melhores profissionais da cidade em poucos cliques.</textarea>
+            </div>
+            <div>
+              <label class="block text-xs text-gray-400 mb-1">Cor do Botão de Ação</label>
+              <input id="builder-color-input" type="color" value="#7c3aed" onchange="updateBuilderPreview()" class="w-full h-8 bg-zinc-900 border border-brand-border rounded cursor-pointer">
+            </div>
+          </div>
+
+          <!-- Preview da Edição -->
+          <div class="lg:col-span-2 bg-zinc-950 p-6 rounded-xl border border-brand-border flex flex-col justify-center">
+            <p class="text-xs text-gray-500 mb-2 font-mono">LIVE_PREVIEW.HTML</p>
+            <div id="builder-live-box" class="bg-zinc-900 p-8 rounded-lg border border-zinc-800 text-center space-y-4">
+              <h2 id="builder-preview-title" class="text-2xl font-bold text-white">Cuidado & Amor Para Seu Pet</h2>
+              <p id="builder-preview-desc" class="text-sm text-gray-300 max-w-md mx-auto">Agende consultas e banhos com os melhores profissionais da cidade em poucos cliques.</p>
+              <button id="builder-preview-btn" class="px-6 py-2.5 text-white font-semibold rounded-lg text-sm" style="background-color: #7c3aed;">Agendar Agora</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 5: RADAR DE CLIENTES (IBGE) -->
+      <section id="tab-clientes" class="hidden">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+          <div>
+            <h1 class="text-2xl font-bold">Radar de Clientes & Oportunidades (IBGE)</h1>
+            <p class="text-xs text-gray-400">Encontre empresas sem presença digital mapeadas em todas as cidades do Brasil</p>
+          </div>
+          <button onclick="openOpportunityModal()" class="px-4 py-2 bg-brand-purple hover:bg-purple-600 rounded-lg text-sm font-semibold flex items-center gap-2">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i> Nova Oportunidade
+          </button>
+        </div>
+
+        <!-- Filtros de Busca -->
+        <div class="bg-brand-card p-4 rounded-xl border border-brand-border mb-6 grid grid-cols-1 md:grid-cols-3 gap-3">
+          <input type="text" id="filter-search" onkeyup="filterOpportunities()" placeholder="Buscar por nome ou cidade..." class="bg-zinc-900 border border-brand-border p-2 rounded text-xs">
+          <select id="filter-category" onchange="filterOpportunities()" class="bg-zinc-900 border border-brand-border p-2 rounded text-xs">
+            <option value="">Todas as Categorias</option>
+            <option value="Barbearia">Barbearia</option>
+            <option value="Pet Shop">Pet Shop</option>
+            <option value="Salão de Beleza">Salão de Beleza</option>
+            <option value="Hortifruti">Hortifruti</option>
+            <option value="Farmácia">Farmácia</option>
+          </select>
+          <div class="text-right text-xs text-gray-400 flex items-center justify-end">
+            Base oficial do IBGE sincronizada
+          </div>
+        </div>
+
+        <!-- Grid de Cards das Oportunidades -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="opportunities-grid">
+          <!-- Inserido dinamicamente via JS -->
+        </div>
+      </section>
+
+      <!-- TAB 6: PAINEL FINANCEIRO, RELATÓRIOS E SIMULAÇÕES -->
+      <section id="tab-financeiro" class="hidden">
+        <h1 class="text-2xl font-bold mb-4">Painel Financeiro & Relatórios</h1>
+
+        <!-- Filtros de Período -->
+        <div class="flex gap-2 mb-6">
+          <button onclick="updateFinancialFilter('hoje')" class="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 rounded text-xs font-semibold">Hoje</button>
+          <button onclick="updateFinancialFilter('mes')" class="px-3 py-1.5 bg-brand-purple rounded text-xs font-semibold">Este Mês</button>
+          <button onclick="updateFinancialFilter('ano')" class="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 rounded text-xs font-semibold">Este Ano</button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div class="p-4 bg-brand-card rounded-xl border border-brand-border">
+            <p class="text-xs text-gray-400">Receita Total de Vendas</p>
+            <p class="text-2xl font-bold text-brand-neon mt-1" id="fin-receita">R$ 5.400,00</p>
+          </div>
+          <div class="p-4 bg-brand-card rounded-xl border border-brand-border">
+            <p class="text-xs text-gray-400">Recorrência Mensal (SaaS/Manutenção)</p>
+            <p class="text-2xl font-bold text-blue-400 mt-1" id="fin-recorrencia">R$ 600,00/mês</p>
+          </div>
+          <div class="p-4 bg-brand-card rounded-xl border border-brand-border">
+            <p class="text-xs text-gray-400">Ticket Médio por Site</p>
+            <p class="text-2xl font-bold text-white mt-1">R$ 900,00</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          <div class="bg-brand-card p-5 rounded-xl border border-brand-border">
+            <h3 class="text-sm font-bold mb-4">Relatório de Faturamento</h3>
+            <canvas id="financeChart" class="max-h-60 w-full"></canvas>
+          </div>
+
+          <!-- Simulador de Metas -->
+          <div class="bg-brand-card p-5 rounded-xl border border-brand-border space-y-4">
+            <h3 class="text-sm font-bold border-b border-brand-border pb-2">Simulador de Projeção de Vendas</h3>
+            <div>
+              <label class="block text-xs text-gray-400 mb-1">Preço Cobrado por Site (R$):</label>
+              <input type="number" id="sim-price" value="800" oninput="runSimulation()" class="w-full bg-zinc-900 border border-brand-border p-2 rounded text-xs">
+            </div>
+            <div>
+              <label class="block text-xs text-gray-400 mb-1">Quantidade de Sites Vendidos por Mês:</label>
+              <input type="number" id="sim-qty" value="5" oninput="runSimulation()" class="w-full bg-zinc-900 border border-brand-border p-2 rounded text-xs">
+            </div>
+            <div class="p-4 bg-zinc-900 rounded-lg border border-brand-border space-y-1">
+              <p class="text-xs text-gray-400">Faturamento Mensal Estimado:</p>
+              <p class="text-xl font-bold text-brand-neon" id="sim-result-mensal">R$ 4.000,00</p>
+              <p class="text-xs text-gray-400 mt-2">Projeção Anual (12 Meses):</p>
+              <p class="text-lg font-bold text-white" id="sim-result-anual">R$ 48.000,00</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- MODAL: NOVA / EDITAR OPORTUNIDADE -->
+  <div id="opp-modal" class="fixed inset-0 bg-black/80 hidden items-center justify-center p-4 z-50">
+    <div class="bg-brand-card border border-brand-border w-full max-w-md rounded-xl p-6 space-y-4">
+      <h3 class="text-lg font-bold" id="modal-opp-title">Cadastrar Oportunidade</h3>
+      <input type="hidden" id="opp-index">
+      <div>
+        <label class="block text-xs text-gray-400 mb-1">Nome da Empresa</label>
+        <input type="text" id="opp-input-name" class="w-full bg-zinc-900 border border-brand-border p-2 rounded text-xs">
+      </div>
+      <div>
+        <label class="block text-xs text-gray-400 mb-1">Categoria</label>
+        <select id="opp-input-category" class="w-full bg-zinc-900 border border-brand-border p-2 rounded text-xs">
+          <option>Barbearia</option>
+          <option>Pet Shop</option>
+          <option>Salão de Beleza</option>
+          <option>Hortifruti</option>
+          <option>Farmácia</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs text-gray-400 mb-1">Endereço Completo (Rua, Nº, Bairro, Cidade)</label>
+        <input type="text" id="opp-input-address" class="w-full bg-zinc-900 border border-brand-border p-2 rounded text-xs">
+      </div>
+      <div>
+        <label class="block text-xs text-gray-400 mb-1">Valor Estimado de Venda (R$)</label>
+        <input type="number" id="opp-input-value" value="500" class="w-full bg-zinc-900 border border-brand-border p-2 rounded text-xs">
+      </div>
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="closeOpportunityModal()" class="px-4 py-2 bg-zinc-800 rounded text-xs">Cancelar</button>
+        <button onclick="saveOpportunity()" class="px-4 py-2 bg-brand-purple rounded text-xs font-semibold">Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: PREVIEW DE MAPA DO GOOGLE MAPS -->
+  <div id="map-modal" class="fixed inset-0 bg-black/80 hidden items-center justify-center p-4 z-50">
+    <div class="bg-brand-card border border-brand-border w-full max-w-2xl rounded-xl p-4 flex flex-col space-y-3">
+      <div class="flex justify-between items-center">
+        <h3 class="text-sm font-bold" id="map-modal-title">Visualização no Google Maps</h3>
+        <button onclick="closeMapModal()" class="text-xs text-red-400 hover:underline">Fechar</button>
+      </div>
+      <div class="w-full h-80 rounded-lg overflow-hidden border border-brand-border">
+        <iframe id="map-iframe" class="w-full h-full border-0" loading="lazy" allowfullscreen src=""></iframe>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCRIPT COMPLETO DE LÓGICA -->
+  <script>
+    // Inicialização do Lucide
+    lucide.createIcons();
+
+    // Base de dados das Oportunidades com Endereços Reais do IBGE
+    let opportunities = JSON.parse(localStorage.getItem('zod_opps')) || [
+      { name: "Lotus Barbearia Clube", category: "Barbearia", address: "R. C-139, qd 238, Lote 08 - Jardim América, Goiânia - GO", price: 500 },
+      { name: "Atelier do Pet", category: "Pet Shop", address: "Rua Rio Grande do Sul, 1004 - Santo Agostinho, Belo Horizonte - MG", price: 600 },
+      { name: "Drogaria Wilson", category: "Farmácia", address: "Av. Pres. Vargas, 542 - Centro, Rio de Janeiro - RJ", price: 1250 },
+      { name: "D&C Salão de Beleza", category: "Salão de Beleza", address: "Rua dos Timbiras, 1412 - Lourdes, Belo Horizonte - MG", price: 500 },
+      { name: "Hortifruti Direto da Roça", category: "Hortifruti", address: "Av. Brasil, 2100 - Funcionários, Curitiba - PR", price: 750 }
+    ];
+
+    let sitesCreated = JSON.parse(localStorage.getItem('zod_sites')) || [
+      { name: "Atelier do Pet", category: "Pet Shop", date: "2026-03-28", status: "Ativo" },
+      { name: "Lotus Barbearia", category: "Barbearia", date: "2026-03-29", status: "Ativo" }
+    ];
+
+    // Alternar Abas do Painel
+    function switchTab(tabName) {
+      const tabs = ['dashboard', 'criar', 'meus-sites', 'builder', 'clientes', 'financeiro'];
+      tabs.forEach(tab => {
+        document.getElementById(`tab-${tab}`).classList.add('hidden');
+        document.getElementById(`nav-${tab}`)?.classList.remove('bg-zinc-800', 'text-white');
+      });
+
+      document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+      document.getElementById(`nav-${tabName}`)?.classList.add('bg-zinc-800', 'text-white');
+
+      if(tabName === 'meus-sites') renderSitesGrid();
+      if(tabName === 'clientes') renderOpportunities();
+      if(tabName === 'financeiro') initFinanceChart();
+    }
+
+    // Renderizar Oportunidades
+    function renderOpportunities() {
+      const grid = document.getElementById('opportunities-grid');
+      grid.innerHTML = '';
+
+      opportunities.forEach((opp, index) => {
+        const encodedAddr = encodeURIComponent(opp.address);
+        const mapSearchUrl = `https://maps.google.com/maps?q=${encodedAddr}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+
+        grid.innerHTML += `
+          <div class="bg-brand-card p-4 rounded-xl border border-brand-border flex flex-col justify-between space-y-3">
+            <div>
+              <div class="flex justify-between items-start">
+                <h4 class="font-bold text-sm text-white">${opp.name}</h4>
+                <span class="text-[10px] bg-zinc-800 text-brand-neon px-2 py-0.5 rounded">${opp.category}</span>
+              </div>
+              <p class="text-xs text-gray-400 mt-2 flex items-start gap-1">
+                <i data-lucide="map-pin" class="w-3 h-3 text-red-400 shrink-0 mt-0.5"></i>
+                <span>${opp.address}</span>
+              </p>
+              <p class="text-xs font-semibold text-brand-neon mt-2">Valor Estimado: R$ ${opp.price}</p>
+            </div>
+
+            <div class="space-y-2 pt-2 border-t border-brand-border">
+              <button onclick="openMapModal('${mapSearchUrl}', '${opp.name}')" class="w-full py-1.5 bg-zinc-900 hover:bg-zinc-800 text-xs text-blue-400 rounded flex items-center justify-center gap-1">
+                <i data-lucide="map" class="w-3 h-3"></i> Ver no Google Maps
+              </button>
+              <div class="flex gap-2">
+                <button onclick="editOpportunity(${index})" class="flex-1 py-1 bg-zinc-800 hover:bg-zinc-700 text-xs rounded text-gray-300">Editar</button>
+                <button onclick="deleteOpportunity(${index})" class="flex-1 py-1 bg-red-950 hover:bg-red-900 text-xs rounded text-red-400">Excluir</button>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      lucide.createIcons();
+      document.getElementById('dash-opps-count').innerText = opportunities.length;
+    }
+
+    // Modal de Oportunidades
+    function openOpportunityModal() {
+      document.getElementById('opp-index').value = '';
+      document.getElementById('opp-input-name').value = '';
+      document.getElementById('opp-input-address').value = '';
+      document.getElementById('opp-input-value').value = '500';
+      document.getElementById('modal-opp-title').innerText = 'Cadastrar Oportunidade';
+      document.getElementById('opp-modal').classList.remove('hidden');
+      document.getElementById('opp-modal').classList.add('flex');
+    }
+
+    function closeOpportunityModal() {
+      document.getElementById('opp-modal').classList.add('hidden');
+      document.getElementById('opp-modal').classList.remove('flex');
+    }
+
+    function saveOpportunity() {
+      const idx = document.getElementById('opp-index').value;
+      const name = document.getElementById('opp-input-name').value;
+      const category = document.getElementById('opp-input-category').value;
+      const address = document.getElementById('opp-input-address').value;
+      const price = document.getElementById('opp-input-value').value;
+
+      if(!name || !address) return alert("Preencha todos os campos!");
+
+      const data = { name, category, address, price: Number(price) };
+
+      if(idx === '') {
+        opportunities.push(data);
+      } else {
+        opportunities[idx] = data;
+      }
+
+      localStorage.setItem('zod_opps', JSON.stringify(opportunities));
+      closeOpportunityModal();
+      renderOpportunities();
+    }
+
+    function editOpportunity(index) {
+      const opp = opportunities[index];
+      document.getElementById('opp-index').value = index;
+      document.getElementById('opp-input-name').value = opp.name;
+      document.getElementById('opp-input-category').value = opp.category;
+      document.getElementById('opp-input-address').value = opp.address;
+      document.getElementById('opp-input-value').value = opp.price;
+      document.getElementById('modal-opp-title').innerText = 'Editar Oportunidade';
+      document.getElementById('opp-modal').classList.remove('hidden');
+      document.getElementById('opp-modal').classList.add('flex');
+    }
+
+    function deleteOpportunity(index) {
+      if(confirm("Deseja remover esta oportunidade?")) {
+        opportunities.splice(index, 1);
+        localStorage.setItem('zod_opps', JSON.stringify(opportunities));
+        renderOpportunities();
+      }
+    }
+
+    // Filtros do Radar
+    function filterOpportunities() {
+      const search = document.getElementById('filter-search').value.toLowerCase();
+      const cat = document.getElementById('filter-category').value;
+
+      const filtered = opportunities.filter(o => {
+        const matchSearch = o.name.toLowerCase().includes(search) || o.address.toLowerCase().includes(search);
+        const matchCat = cat === '' || o.category === cat;
+        return matchSearch && matchCat;
+      });
+
+      const grid = document.getElementById('opportunities-grid');
+      grid.innerHTML = '';
+      filtered.forEach((opp, index) => {
+        const encodedAddr = encodeURIComponent(opp.address);
+        const mapSearchUrl = `https://maps.google.com/maps?q=${encodedAddr}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+        grid.innerHTML += `
+          <div class="bg-brand-card p-4 rounded-xl border border-brand-border flex flex-col justify-between space-y-3">
+            <div>
+              <h4 class="font-bold text-sm text-white">${opp.name}</h4>
+              <p class="text-xs text-gray-400 mt-1">${opp.address}</p>
+            </div>
+            <button onclick="openMapModal('${mapSearchUrl}', '${opp.name}')" class="w-full py-1 bg-zinc-900 text-xs text-blue-400 rounded">Ver no Mapa</button>
+          </div>
+        `;
+      });
+    }
+
+    // Modal de Mapa do Google
+    function openMapModal(url, title) {
+      document.getElementById('map-modal-title').innerText = `Mapa: ${title}`;
+      document.getElementById('map-iframe').src = url;
+      document.getElementById('map-modal').classList.remove('hidden');
+      document.getElementById('map-modal').classList.add('flex');
+    }
+
+    function closeMapModal() {
+      document.getElementById('map-modal').classList.add('hidden');
+      document.getElementById('map-modal').classList.remove('flex');
+    }
+
+    // Vitrine ZOD e Meus Sites
+    function renderSitesGrid() {
+      const grid = document.getElementById('sites-grid');
+      grid.innerHTML = '';
+
+      sitesCreated.forEach((site, index) => {
+        grid.innerHTML += `
+          <div class="bg-brand-card p-4 rounded-xl border border-brand-border flex flex-col justify-between">
+            <div>
+              <div class="flex justify-between items-center mb-2">
+                <span class="text-xs font-bold text-brand-purple">${site.category}</span>
+                <span class="text-[10px] text-brand-neon bg-zinc-900 px-2 py-0.5 rounded">${site.status}</span>
+              </div>
+              <h3 class="font-bold text-base text-white">${site.name}</h3>
+              <p class="text-xs text-gray-400 mt-1">Criado em: ${site.date}</p>
+            </div>
+            <div class="flex gap-2 mt-4 pt-3 border-t border-brand-border">
+              <button onclick="switchTab('builder')" class="flex-1 py-1.5 bg-brand-purple text-xs font-semibold rounded">Editar no Construtor</button>
+              <button onclick="deleteSite(${index})" class="py-1.5 px-3 bg-red-950 text-red-400 text-xs font-semibold rounded">Apagar</button>
+            </div>
+          </div>
+        `;
+      });
+      document.getElementById('dash-sites-count').innerText = sitesCreated.length;
+    }
+
+    function deleteSite(index) {
+      if(confirm("Deseja apagar este site da Vitrine?")) {
+        sitesCreated.splice(index, 1);
+        localStorage.setItem('zod_sites', JSON.stringify(sitesCreated));
+        renderSitesGrid();
+      }
+    }
+
+    // Gerador com IA
+    function startGeneration() {
+      const name = document.getElementById('client-name').value;
+      const category = document.getElementById('client-category').value;
+      if(!name) return alert("Digite o nome da empresa!");
+
+      const progressContainer = document.getElementById('build-progress');
+      const progressBar = document.getElementById('progress-bar');
+      const statusText = document.getElementById('status-text');
+      const btnContainer = document.getElementById('preview-btn-container');
+
+      progressContainer.classList.remove('hidden');
+      btnContainer.classList.add('hidden');
+      progressBar.style.width = '0%';
+
+      const steps = [
+        { pct: '25%', text: 'Lendo briefing do cliente...' },
+        { pct: '50%', text: 'Organizando textos, fotos e chamadas...' },
+        { pct: '75%', text: 'Escrevendo código HTML/CSS...' },
+        { pct: '100%', text: 'Site concluído e publicado!' }
+      ];
+
+      let step = 0;
+      const interval = setInterval(() => {
+        if(step < steps.length) {
+          progressBar.style.width = steps[step].pct;
+          statusText.innerText = steps[step].text;
+          step++;
+        } else {
+          clearInterval(interval);
+          btnContainer.classList.remove('hidden');
+          
+          // Adiciona à lista de sites
+          sitesCreated.push({ name, category, date: new Date().toISOString().split('T')[0], status: 'Ativo' });
+          localStorage.setItem('zod_sites', JSON.stringify(sitesCreated));
+        }
+      }, 500);
+    }
+
+    // Construtor Visual Live
+    function updateBuilderPreview() {
+      const title = document.getElementById('builder-title-input').value;
+      const desc = document.getElementById('builder-desc-input').value;
+      const color = document.getElementById('builder-color-input').value;
+
+      document.getElementById('builder-preview-title').innerText = title;
+      document.getElementById('builder-preview-desc').innerText = desc;
+      document.getElementById('builder-preview-btn').style.backgroundColor = color;
+    }
+
+    // Simulador Financeiro
+    function runSimulation() {
+      const price = Number(document.getElementById('sim-price').value) || 0;
+      const qty = Number(document.getElementById('sim-qty').value) || 0;
+
+      const mensal = price * qty;
+      const anual = mensal * 12;
+
+      document.getElementById('sim-result-mensal').innerText = `R$ ${mensal.toLocaleString('pt-BR')},00`;
+      document.getElementById('sim-result-anual').innerText = `R$ ${anual.toLocaleString('pt-BR')},00`;
+    }
+
+    function updateFinancialFilter(period) {
+      if(period === 'hoje') {
+        document.getElementById('fin-receita').innerText = "R$ 800,00";
+      } else if(period === 'mes') {
+        document.getElementById('fin-receita').innerText = "R$ 5.400,00";
+      } else {
+        document.getElementById('fin-receita').innerText = "R$ 64.800,00";
+      }
+    }
+
+    // Gráficos (Chart.js)
+    let finChartInstance = null;
+    function initFinanceChart() {
+      const ctx = document.getElementById('financeChart')?.getContext('2d');
+      if(!ctx) return;
+
+      if(finChartInstance) finChartInstance.destroy();
+
+      finChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+          datasets: [{
+            label: 'Faturamento (R$)',
+            data: [2400, 3200, 4800, 5400, 6200, 7800],
+            backgroundColor: '#7c3aed'
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { ticks: { color: '#9ca3af' }, grid: { color: '#27272a' } },
+            x: { ticks: { color: '#9ca3af' }, grid: { color: '#27272a' } }
+          }
+        }
+      });
+    }
+
+    function initDashChart() {
+      const ctx = document.getElementById('dashChart')?.getContext('2d');
+      if(!ctx) return;
+
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'],
+          datasets: [{
+            label: 'Oportunidades Convertidas',
+            data: [2, 5, 4, 8],
+            borderColor: '#22c55e',
+            borderWidth: 2,
+            tension: 0.3
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { ticks: { color: '#9ca3af' }, grid: { color: '#27272a' } },
+            x: { ticks: { color: '#9ca3af' }, grid: { color: '#27272a' } }
+          }
+        }
+      });
+    }
+
+    // On Load
+    window.onload = function() {
+      renderOpportunities();
+      renderSitesGrid();
+      initDashChart();
+      runSimulation();
+    };
+  </script>
+</body>
+</html>
